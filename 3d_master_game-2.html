@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D Мастер — игра</title>
+<style>
+:root{--bg:#090f20;--panel:#121d35;--panel2:#1a2948;--cyan:#5ee7ff;--violet:#9b8cff;--green:#59e3a1;--text:#f3f6ff;--muted:#a9b7d2}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 15% 5%,#26386b 0,transparent 34%),radial-gradient(circle at 90% 90%,#3a2266 0,transparent 32%),var(--bg);color:var(--text);font-family:Inter,Arial,sans-serif}
+.wrap{max-width:1000px;margin:auto;padding:24px 16px 40px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{font-weight:900;letter-spacing:2px;font-size:14px;color:var(--cyan)}.stats{display:flex;gap:10px}.pill{background:#172542;border:1px solid #31466e;padding:9px 14px;border-radius:30px;color:var(--muted);font-size:13px}.pill b{color:white}
+.hero{text-align:center;padding:28px 0 18px}.hero h1{font-size:clamp(34px,7vw,62px);margin:8px 0;background:linear-gradient(90deg,var(--cyan),#b8a7ff);-webkit-background-clip:text;color:transparent}.hero p{color:var(--muted);margin:0}
+.layout{display:grid;grid-template-columns:1.05fr .95fr;gap:18px;margin-top:18px}.panel{background:linear-gradient(145deg,#172542ed,#101a30ed);border:1px solid #30466d;border-radius:22px;padding:22px;box-shadow:0 18px 50px #0005}
+.scene{height:290px;display:grid;place-items:center;perspective:800px;overflow:hidden;position:relative;background:radial-gradient(ellipse at center,#293e70 0,#14213e 48%,#10192e 78%);border-radius:17px}
+.scene:after{content:"";position:absolute;bottom:32px;width:230px;height:35px;background:#050a18;filter:blur(18px);border-radius:50%}
+.shape{position:relative;z-index:1;transform-style:preserve-3d;animation:float 4s ease-in-out infinite;transition:transform .4s}
+@keyframes float{0%,100%{transform:translateY(0) rotateX(-20deg) rotateY(35deg)}50%{transform:translateY(-15px) rotateX(-10deg) rotateY(75deg)}}
+.cube{width:120px;height:120px;transform-style:preserve-3d}.face{position:absolute;width:120px;height:120px;border:2px solid #ffffff66;background:#5ee7ffbb;box-shadow:inset 0 0 30px #fff3}.front{transform:translateZ(60px)}.back{transform:rotateY(180deg) translateZ(60px);background:#3975c9}.right{transform:rotateY(90deg) translateZ(60px);background:#7868d9}.left{transform:rotateY(-90deg) translateZ(60px);background:#43b9ce}.topface{transform:rotateX(90deg) translateZ(60px);background:#a8f2ff}.bottom{transform:rotateX(-90deg) translateZ(60px);background:#31548d}
+.sphere{width:135px;height:135px;border-radius:50%;background:radial-gradient(circle at 28% 22%,#fff 0,#c9fbff 7%,#69ddff 23%,#2586d9 55%,#172b83 88%);box-shadow:inset -19px -18px 32px #101e65, inset 8px 7px 18px #ffffff88,0 0 35px #5ee7ff66;animation:spinSphere 7s linear infinite}\n@keyframes spinSphere{to{transform:rotateY(360deg) rotateX(360deg)}}\n.cone3d{position:relative;width:150px;height:155px;transform-style:preserve-3d;filter:drop-shadow(12px 15px 10px #0008)}\n.coneBody{position:absolute;left:0;top:0;width:150px;height:145px;clip-path:polygon(50% 0,100% 100%,0 100%);background:linear-gradient(105deg,#5144b5 0%,#b8a5ff 34%,#8974ef 55%,#40318f 100%);border-radius:8px}\n.coneBase{position:absolute;left:0;bottom:0;width:150px;height:35px;border-radius:50%;background:linear-gradient(90deg,#332779,#a18bff 45%,#5440b4);border:2px solid #c6baff;transform:rotateX(8deg)}\n.torus{position:relative;width:150px;height:115px;border:0;border-radius:50%;background:radial-gradient(ellipse at center,transparent 35%,#1a9e82 37%,#7affd2 48%,#2bbf9b 61%,#126d72 70%,transparent 72%);filter:drop-shadow(0 12px 9px #0008);transform:rotateX(58deg);animation:torusTurn 6s ease-in-out infinite}\n@keyframes torusTurn{0%,100%{transform:rotateX(58deg) rotateZ(-12deg)}50%{transform:rotateX(72deg) rotateZ(18deg)}}
+.caption{position:absolute;bottom:12px;z-index:2;color:#b7c8eb;font-size:12px;letter-spacing:2px}
+h2{margin:0 0 10px;font-size:23px}.sub{color:var(--muted);font-size:14px;line-height:1.5}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}.opt{border:1px solid #3a507a;background:#1a2b4c;color:white;padding:14px;border-radius:13px;cursor:pointer;font-size:15px;transition:.2s}.opt:hover{border-color:var(--cyan);transform:translateY(-2px)}.opt.selected{border-color:var(--cyan);background:#17405a}.opt.good{border-color:var(--green);background:#164a3c}.opt.bad{border-color:#ff788d;background:#55283c}
+button{font:inherit}.mainbtn{width:100%;margin-top:16px;border:0;border-radius:13px;padding:14px;background:linear-gradient(90deg,#27badb,#8375ed);color:#071326;font-weight:800;cursor:pointer}.mainbtn:disabled{opacity:.4;cursor:not-allowed}
+.progress{height:8px;background:#263756;border-radius:9px;overflow:hidden;margin:16px 0}.bar{height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--violet));transition:.3s}
+.feedback{min-height:44px;margin-top:12px;color:var(--muted);font-size:14px;line-height:1.45}.feedback.goodtxt{color:var(--green)}.feedback.badtxt{color:#ff9aac}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.tool{flex:1;min-width:100px;padding:10px;border:1px solid #344b73;background:#182947;color:#dce8ff;border-radius:11px;cursor:pointer}.tool.active{border-color:var(--cyan);color:var(--cyan);background:#173a50}
+.footer{text-align:center;color:#7183a5;font-size:12px;margin-top:20px}
+@media(max-width:760px){.layout{grid-template-columns:1fr}.scene{height:230px}.panel{padding:18px}.hero{padding-top:22px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="top"><div class="logo">◆ DIGITAL LAB / INFORMATИКА</div><div class="stats"><div class="pill">⭐ Очки: <b id="score">0</b></div><div class="pill">🏆 Уровень: <b id="level">1</b></div></div></div>
+ <header class="hero"><div class="logo">ИНТЕРАКТИВНАЯ ИГРА</div><h1>3D МАСТЕР</h1><p>Создавай виртуальные объекты. Проверяй знания. Стань профи!</p></header>
+ <main class="layout">
+  <section class="panel">
+   <div class="scene"><div class="shape" id="shape"><div class="cube"><div class="face front"></div><div class="face back"></div><div class="face right"></div><div class="face left"></div><div class="face topface"></div><div class="face bottom"></div></div></div><div class="caption" id="shapeName">3D OBJECT / CUBE</div></div>
+   <h2 style="margin-top:18px">🧊 3D-конструктор</h2><div class="sub">Выбери фигуру — посмотри, как выглядит базовая 3D-форма.</div>
+   <div class="tools"><button class="tool active" data-shape="cube">Куб</button><button class="tool" data-shape="sphere">Сфера</button><button class="tool" data-shape="cone">Конус</button><button class="tool" data-shape="torus">Тор</button></div>
+   <div class="sub" style="margin-top:14px">Подсказка: 3D-объект имеет ширину, высоту и глубину.</div>
+  </section>
+  <section class="panel">
+   <div class="logo">МИССИЯ <span id="qnum">01</span> / 10</div>
+   <h2 id="question" style="margin-top:12px">Что означает «3D»?</h2>
+   <div class="sub" id="description">Выбери правильный ответ, чтобы пройти миссию.</div>
+   <div class="progress"><div class="bar" id="bar"></div></div>
+   <div class="options" id="answers"></div>
+   <div class="feedback" id="feedback">Выбери один вариант ответа.</div>
+   <button class="mainbtn" id="next" disabled>Проверить ответ</button>
+  </section>
+ </main>
+ <div class="footer">3D МАСТЕР · Учебная игра по информатике · Удачи!</div>
+</div>
+<script>
+const questions=[
+ {q:"Что означает «3D»?",d:"Сколько измерений описывает трёхмерный объект?",a:["Три измерения","Три документа","Три программы","Три цвета"],c:0,why:"3D — это три измерения: ширина, высота и глубина."},
+ {q:"Какая программа популярна для 3D-моделирования?",d:"Выбери программу для создания трёхмерных сцен.",a:["Excel","Blender","PowerPoint","Блокнот"],c:1,why:"Blender — бесплатная программа для моделирования, анимации и рендеринга."},
+ {q:"Как называется шарообразная 3D-фигура?",d:"Вспомни название геометрического тела.",a:["Куб","Пирамида","Сфера","Цилиндр"],c:2,why:"Сфера — поверхность, все точки которой равноудалены от центра."},
+ {q:"Что такое полигон в 3D-графике?",d:"Из каких элементов часто состоит поверхность модели?",a:["Многоугольник","Звуковая дорожка","Текстовый файл","Слайд"],c:0,why:"Полигон — многоугольная грань сетки 3D-модели."},
+ {q:"Для чего нужна текстура?",d:"Она помогает сделать модель визуально реалистичнее.",a:["Изменить звук","Задать вид поверхности","Удалить объект","Ускорить интернет"],c:1,why:"Текстура задаёт детали поверхности: цвет, рисунок и другие свойства."},
+ {q:"Что такое рендеринг?",d:"Финальный этап получения изображения сцены.",a:["Поворот мыши","Сохранение пароля","Расчёт итогового изображения","Создание папки"],c:2,why:"Рендеринг рассчитывает изображение с учётом объектов, света и материалов."},
+ {q:"Какие оси задают положение в 3D-пространстве?",d:"Три координаты в пространстве.",a:["A, B, C","X, Y, Z","1, 2, 3","R, G, B"],c:1,why:"Оси X, Y и Z задают положение по трём направлениям."},
+ {q:"Что можно создать с помощью 3D-моделирования?",d:"Выбери самый полный вариант.",a:["Только таблицы","Только письма","Персонажей, здания и предметы","Только аудио"],c:2,why:"3D-модели используют в играх, архитектуре, кино, медицине и промышленности."},
+ {q:"Что такое каркас (mesh) модели?",d:"Основа геометрии объекта.",a:["Сетка вершин, рёбер и граней","Музыкальный файл","Список сайтов","Цветной фильтр"],c:0,why:"Mesh — полигональная сетка из вершин, рёбер и граней."},
+ {q:"Что делает 3D-принтер?",d:"Он переносит цифровую модель в физический мир.",a:["Показывает видео","Печатает объёмные предметы","Создаёт презентации","Запускает браузер"],c:1,why:"3D-принтер послойно создаёт реальный предмет по цифровой модели."}
+];
+let current=0,score=0,selected=-1,checked=false;
+const $=id=>document.getElementById(id);
+function render(){
+ const q=questions[current];$('qnum').textContent=String(current+1).padStart(2,'0');$('question').textContent=q.q;$('description').textContent=q.d;$('bar').style.width=(current/questions.length*100)+'%';$('feedback').textContent='Выбери один вариант ответа.';$('feedback').className='feedback';$('next').disabled=true;$('next').textContent='Проверить ответ';selected=-1;checked=false;
+ $('answers').innerHTML='';
+ q.a.forEach((a,i)=>{const b=document.createElement('button');b.className='opt';b.textContent=String.fromCharCode(65+i)+'. '+a;b.onclick=()=>choose(i);$('answers').appendChild(b)});
+}
+function choose(i){if(checked)return;selected=i;[...$('answers').children].forEach((b,n)=>b.classList.toggle('selected',n===i));$('next').disabled=false}
+$('next').onclick=()=>{
+ if(!checked){if(selected<0)return;checked=true;const q=questions[current],ok=selected===q.c;if(ok){score+=10;$('score').textContent=score;$('feedback').className='feedback goodtxt';$('feedback').textContent='✓ Верно! '+q.why}else{$('feedback').className='feedback badtxt';$('feedback').textContent='✕ Не совсем. '+q.why}
+ [...$('answers').children].forEach((b,n)=>{b.disabled=true;if(n===q.c)b.classList.add('good');else if(n===selected)b.classList.add('bad')});
+ $('next').textContent=current===questions.length-1?'Показать результат':'Следующая миссия';$('bar').style.width=((current+1)/questions.length*100)+'%';
+ }else{current++;if(current<questions.length){$('level').textContent=Math.floor(current/3)+1;render()}else finish()}
+};
+function finish(){document.querySelector('.layout').innerHTML=`<section class="panel" style="grid-column:1/-1;text-align:center;padding:40px 20px"><div style="font-size:60px">🏆</div><div class="logo">МИССИЯ ВЫПОЛНЕНА</div><h2 style="font-size:34px;margin:12px">Твой результат: ${score} / 100</h2><p class="sub">${score>=90?'Невероятно! Ты настоящий мастер 3D!':score>=70?'Отличная работа! Ты хорошо разбираешься в 3D.':score>=50?'Хороший старт! Продолжай изучать 3D-моделирование.':'Начало положено! Повтори материал и попробуй ещё раз.'}</p><button class="mainbtn" onclick="location.reload()">Играть заново</button></section>`}
+document.querySelectorAll('.tool').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.tool').forEach(x=>x.classList.remove('active'));btn.classList.add('active');const type=btn.dataset.shape,shape=$('shape');shape.innerHTML='';shape.className='shape';$('shapeName').textContent='3D OBJECT / '+type.toUpperCase();if(type==='cube'){shape.innerHTML='<div class="cube"><div class="face front"></div><div class="face back"></div><div class="face right"></div><div class="face left"></div><div class="face topface"></div><div class="face bottom"></div></div>'}else if(type==='sphere'){shape.innerHTML='<div class="sphere"></div>'}else if(type==='cone'){shape.innerHTML='<div class="cone3d"><div class="coneBody"></div><div class="coneBase"></div></div>'}else{shape.innerHTML='<div class="torus"></div>'}});
+render();
+</script>
+</body>
+</html>
